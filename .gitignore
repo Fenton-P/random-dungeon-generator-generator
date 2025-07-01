@@ -1,0 +1,5 @@
+.project
+.classpath
+org.eclipse.core.resources
+org.eclipse.jdt.core
+.settings
