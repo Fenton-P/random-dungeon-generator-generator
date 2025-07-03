@@ -101,8 +101,8 @@ public class Node {
 		return childNodes;
 	}
 	
-	public void addDoor(Vector door) {
-		doors.add(new Door(door));
+	public void addDoor(Door door) {
+		doors.add(door);
 		
 		for(Node childNode : childNodes) {
 			childNode.addDoor(door);

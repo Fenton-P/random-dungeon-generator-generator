@@ -229,4 +229,8 @@ public class ShapeGrid extends Widget {
 			paint.drawLine(0, i * boxSize, 800, i * boxSize);
 		}
 	}
+	
+	public int getScale() {
+		return boxSize;
+	}
 }

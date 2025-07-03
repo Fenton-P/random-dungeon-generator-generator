@@ -66,4 +66,25 @@ public class Vector {
 	public String toString() {
 		return "X: " + x + ", Y: " + y;
 	}
+	
+	public double distanceTo(Point p1) {
+		double x1 = x - p1.x;
+		double y1 = y - p1.y;
+		
+		return Math.sqrt(x1 * x1 + y1 * y1);
+	}
+	
+	public double distanceTo(Vector p1) {
+		double x1 = x - p1.getX();
+		double y1 = y - p1.getY();
+		
+		return Math.sqrt(x1 * x1 + y1 * y1);
+	}
+	
+	public static double pointDistance(Point p1, Point p2) {
+		double x1 = p1.x - p2.x;
+		double x2 = p1.y - p2.y;
+		
+		return Math.sqrt(x1 * x1 + x2 * x2);
+	}
 }

@@ -58,13 +58,13 @@ public class EditShapeScreen extends WindowHandler {
 		addDoor = new ModernButton("Add Door");
 		addDoor.setCenterBox(new Dimension(150, 800));
 		
+		shapeGrid = new ShapeGrid(Main.getSelectedNode(), this);
+		doorPanel = new DoorPanel(shapeGrid.getScale(), shapeGrid.getPoints());
+		
 		addDoor.setOnClick(() -> {
 			doorPanel.addDoor();
 		});
 		
-		doorPanel = new DoorPanel();
-		
-		shapeGrid = new ShapeGrid(Main.getSelectedNode(), this);
 		points = shapeGrid.getPoints();
 		
 		if(Main.getSelectedNode().isRoot()) {

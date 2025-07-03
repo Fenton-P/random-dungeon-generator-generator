@@ -242,7 +242,7 @@ public abstract class PolygonCollision {
 		return theta;
 	}
 	
-	private static double getTheta(Vector vector) {
+	public static double getTheta(Vector vector) {
 		Set<Double> possibleAngles = new HashSet<>();
 		
 		double beta = Math.acos(vector.getX());
