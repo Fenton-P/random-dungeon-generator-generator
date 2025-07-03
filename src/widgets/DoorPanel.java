@@ -174,20 +174,21 @@ public class DoorPanel extends Widget {
 					}
 				}
 				
-				int index2 = (index + 1) % points.size();
-				
 				if(smallestPointDistance < closestPoint.distanceTo(m)) {
-					return new Door(new Vector(startPoint), new Vector(nextPoint), 0);
+					//return new Door(sorted.get(i), (sorted.get(i) + 1) % points.size(), 0);
+					break;
 				}
 				
 				double scalar = closestPoint.distanceTo(startPoint) / Vector.pointDistance(startPoint, nextPoint);
 				
-				return new Door(new Vector(startPoint), new Vector(nextPoint), scalar);
+				return new Door(sorted.get(i), (sorted.get(i) + 1) % points.size(), scalar);
 			}
 		}
 		
 		double smallestPointDistance = Double.MAX_VALUE;
 		int index = 0;
+		
+		//System.out.println("START");
 		
 		for(int j = 0;j<points.size();j++) {
 			Point point = points.get(j);
@@ -197,22 +198,37 @@ public class DoorPanel extends Widget {
 				smallestPointDistance = distance;
 				index = j;
 			}
+			
+			//System.out.println(index);
+			//System.out.println(distance);
 		}
 		
-		return new Door(new Vector(points.get(index)), new Vector(points.get((index + 1) % points.size())), 0);
+		return new Door(index, (index + 1) % points.size(), 0);
 	}
 	
 	private boolean vectorBetweenPoints(Vector v, Point p1, Point p2) {
-		Line line1 = new Line(p1, p2);
-		VectorLine line2 = new VectorLine(new Vector(p1), v);
-		double d = v.distanceTo(p1) + v.distanceTo(p2);
-//		System.out.println("START");
-//		System.out.println(v);
-//		System.out.println(p1 + " | " + p2);
-//		System.out.println(Vector.pointDistance(p1, p2) + " | " + d);
-//		System.out.println("END");
+//		Line line1 = new Line(p1, p2);
+//		VectorLine line2 = new VectorLine(new Vector(p1), v);
+//		double d = v.distanceTo(p1) + v.distanceTo(p2);
+////		System.out.println("START");
+////		System.out.println(v);
+////		System.out.println(p1 + " | " + p2);
+////		System.out.println(Vector.pointDistance(p1, p2) + " | " + d);
+////		System.out.println("END");
+//		
+//		return d  == Vector.pointDistance(p1, p2);
 		
-		return d  == Vector.pointDistance(p1, p2);
+		// ATTEMPT 2 (problem with double rounding error - needs to be generous)
+		
+		double d1 = v.distanceTo(p1);
+		double d2 = v.distanceTo(p2);
+		double d3 = Vector.pointDistance(p1, p2);
+		
+		if(d1 > d3 || d2 > d3) return false;
+		
+		//Doesn't check if it is one the line, however, that level of security is not needed, just a general check should suffice.
+		
+		return true;
 	}
 	
 	private Vector getClosestPointOnLine(Point point, Line line) {
@@ -246,22 +262,22 @@ public class DoorPanel extends Widget {
 //		paint.fillRoundRect(400, 300, 20, 5, 5, 5);
 		
 		for(Door door : doors) {
-			System.out.println(door);
+			//System.out.println(door);
 			//Get angle
-			double x = door.getPoint2().getX() - door.getPoint1().getX();
-			double y = door.getPoint2().getY() - door.getPoint1().getY();
+			double x = points.get(door.getPoint2()).getX() - points.get(door.getPoint1()).getX();
+			double y = points.get(door.getPoint2()).getY() - points.get(door.getPoint1()).getY();
 			Vector normalized = new Vector(x, y).normalize();
 			double theta = PolygonCollision.getTheta(normalized);
 			
-			System.out.println("START");
-			System.out.println(theta);
-			System.out.println(normalized);
-			System.out.println("END");
+//			System.out.println("START");
+//			System.out.println(theta);
+//			System.out.println(normalized);
+//			System.out.println("END");
 			
 			x *= door.getScalar();
 			y *= door.getScalar();
-			x += door.getPoint1().getX();
-			y += door.getPoint1().getY();
+			x += points.get(door.getPoint1()).getX();
+			y += points.get(door.getPoint1()).getY();
 			
 			//System.out.println(door);
 			

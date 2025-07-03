@@ -251,8 +251,8 @@ public abstract class PolygonCollision {
 		
 		beta = Math.asin(vector.getY());
 		
-		System.out.println(beta);
-		System.out.println(possibleAngles);
+		//System.out.println(beta);
+		//System.out.println(possibleAngles);
 		
 		if(beta < 0) beta = Math.PI * 2 + beta;
 		
