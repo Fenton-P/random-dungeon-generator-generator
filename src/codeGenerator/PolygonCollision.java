@@ -251,11 +251,16 @@ public abstract class PolygonCollision {
 		
 		beta = Math.asin(vector.getY());
 		
+		System.out.println(beta);
+		System.out.println(possibleAngles);
+		
+		if(beta < 0) beta = Math.PI * 2 + beta;
+		
 		for(double theta : possibleAngles) {
 			if((int) (theta * 1000) == (int) (beta * 1000)) return theta;
 		}
 		
-		return 2 * Math.PI - beta;
+		return Math.PI - beta;
 	}
 	
 	private static Vector getCentroid(Vector p1, Vector p2, Vector p3) {

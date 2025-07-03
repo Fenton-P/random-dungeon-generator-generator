@@ -253,18 +253,23 @@ public class DoorPanel extends Widget {
 			Vector normalized = new Vector(x, y).normalize();
 			double theta = PolygonCollision.getTheta(normalized);
 			
+			System.out.println("START");
+			System.out.println(theta);
+			System.out.println(normalized);
+			System.out.println("END");
+			
 			x *= door.getScalar();
 			y *= door.getScalar();
 			x += door.getPoint1().getX();
 			y += door.getPoint1().getY();
 			
-			System.out.println(door);
+			//System.out.println(door);
 			
 			int finalX = (int)(x);
 			int finalY = (int)(y);
 			
 			//paint.fillRect(300,  300,  100,  100);
-			System.out.println(finalX + " | " + finalY);
+			//System.out.println(finalX + " | " + finalY);
 			//paint.fillRect(finalX, finalY, 100, 100);
 			
 			paint.rotate(theta, finalX, finalY);
