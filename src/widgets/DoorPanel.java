@@ -20,34 +20,35 @@ import codeGenerator.Vector;
 import generator.Door;
 import generator.Line;
 import generator.Main;
+import generator.Node;
 import generator.VectorLine;
 
 public class DoorPanel extends Widget {
 	private static final long serialVersionUID = 5085530429578026984L;
 
 	private Set<Door> doors;
+	private Set<Door> immutableDoors;
 	private final Color doorColor = new Color(255, 211, 99);
 	private int doorWidth;
 	private int doorHeight;
-	private int scalar;
 	private MouseListener doorPlaceListener;
 	private MouseMotionListener doorLocationListener;
 	private ArrayList<Point> points;
 	private Door doorHolder;
 	private ArrayList<Line> lines;
 	
-	public DoorPanel(int scalar, ArrayList<Point> points) {
+	public DoorPanel(ArrayList<Point> points, Node node) {
 		setOpaque(false);
 		setLocation(0, 0);
 		setSize(new Dimension(800, 450));
 		
-		doors = new HashSet<>();
+		doors = node.getDoors();
+		immutableDoors = node.getParentDoors();
 		
 		doorWidth = 30;
 		doorHeight = 6;
 		
 		this.points = points;
-		this.scalar = scalar;
 	}
 	
 	public ArrayList<Line> getLines() {
@@ -60,6 +61,10 @@ public class DoorPanel extends Widget {
 		}
 		
 		return lines;
+	}
+	
+	public Set<Door> getDoors() {
+		return doors;
 	}
 	
 	public void addDoor() {
@@ -261,44 +266,63 @@ public class DoorPanel extends Widget {
 //		paint.setColor(Color.black);
 //		paint.fillRoundRect(400, 300, 20, 5, 5, 5);
 		
+		Set<Door> doors = new HashSet<>();
+		
+		doors.addAll(this.doors);
+		doors.addAll(immutableDoors);
+		
 		for(Door door : doors) {
-			//System.out.println(door);
-			//Get angle
-			double x = points.get(door.getPoint2()).getX() - points.get(door.getPoint1()).getX();
-			double y = points.get(door.getPoint2()).getY() - points.get(door.getPoint1()).getY();
-			Vector normalized = new Vector(x, y).normalize();
-			double theta = PolygonCollision.getTheta(normalized);
-			
-//			System.out.println("START");
-//			System.out.println(theta);
-//			System.out.println(normalized);
-//			System.out.println("END");
-			
-			x *= door.getScalar();
-			y *= door.getScalar();
-			x += points.get(door.getPoint1()).getX();
-			y += points.get(door.getPoint1()).getY();
-			
-			//System.out.println(door);
-			
-			int finalX = (int)(x);
-			int finalY = (int)(y);
-			
-			//paint.fillRect(300,  300,  100,  100);
-			//System.out.println(finalX + " | " + finalY);
-			//paint.fillRect(finalX, finalY, 100, 100);
-			
-			paint.rotate(theta, finalX, finalY);
-			
-			finalX -= doorWidth / 2;
-			finalY -= doorHeight / 2;
-			
-			paint.fillRoundRect(finalX, finalY, doorWidth, doorHeight, 5, 5);
-			
-			finalX += doorWidth / 2;
-			finalY += doorHeight / 2;
-			
-			paint.rotate(-theta, finalX, finalY);
+			drawDoor(paint, door, points, doorWidth, doorHeight);
 		}
+	}
+	
+	public static void drawDoor(Graphics2D paint, Door door, ArrayList<Point> points, int doorWidth, int doorHeight) {
+		//System.out.println(door);
+		//Get angle
+		double x = points.get(door.getPoint2()).getX() - points.get(door.getPoint1()).getX();
+		double y = points.get(door.getPoint2()).getY() - points.get(door.getPoint1()).getY();
+		Vector normalized = new Vector(x, y).normalize();
+		double theta = PolygonCollision.getTheta(normalized);
+		
+//		System.out.println("START");
+//		System.out.println(theta);
+//		System.out.println(normalized);
+//		System.out.println("END");
+		
+		x *= door.getScalar();
+		y *= door.getScalar();
+		x += points.get(door.getPoint1()).getX();
+		y += points.get(door.getPoint1()).getY();
+		
+		//System.out.println(door);
+		
+		int finalX = (int)(x);
+		int finalY = (int)(y);
+		
+		//paint.fillRect(300,  300,  100,  100);
+		//System.out.println(finalX + " | " + finalY);
+		//paint.fillRect(finalX, finalY, 100, 100);
+		
+		paint.rotate(theta, finalX, finalY);
+		
+		finalX -= doorWidth / 2;
+		finalY -= doorHeight / 2;
+		
+		paint.fillRoundRect(finalX, finalY, doorWidth, doorHeight, 5, 5);
+		
+		finalX += doorWidth / 2;
+		finalY += doorHeight / 2;
+		
+		paint.rotate(-theta, finalX, finalY);
+	}
+	
+	public static void drawDoor(Graphics2D paint, Door door, ArrayList<Point> points, int offsetX, int offsetY, int doorWidth, int doorHeight) {
+		ArrayList<Point> newPoints = new ArrayList<>();
+		
+		for(Point point : points) {
+			newPoints.add(new Point(offsetX + point.x, offsetY + point.y));
+		}
+		
+		drawDoor(paint, door, newPoints, doorWidth, doorHeight);
 	}
 }

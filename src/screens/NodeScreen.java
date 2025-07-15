@@ -62,7 +62,12 @@ public class NodeScreen extends WindowHandler {
 		
 		generate.setOnClick(() -> WindowHandler.putWindow(Generate.class));
 		backBtn.setOnClick(() -> WindowHandler.putWindow(OpeningScreen.class));
-		addNewNode.setOnClick(() -> WindowHandler.putWindow(AddNode.class));
+		
+		addNewNode.setOnClick(() -> {
+			Main.setCreatingRootNode(true);
+			WindowHandler.putWindow(AddNode.class);
+		});
+		
 		generationSettings.setOnClick(() -> WindowHandler.putWindow(GenerationSettings.class));
 		
 		roomNodeWidgets = new HashSet<>();

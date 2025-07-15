@@ -11,11 +11,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import codeGenerator.HallwayNode;
 import codeGenerator.PolygonCollision;
+import codeGenerator.Vector;
+import generator.Door;
 import generator.Main;
 import generator.Node;
 import generator.Room;
 import generator.WindowHandler;
+import widgets.DoorPanel;
 
 public class Generate extends WindowHandler {
 	private static final long serialVersionUID = -4622964542876776200L;
@@ -23,6 +27,9 @@ public class Generate extends WindowHandler {
 	private Set<Node> nodes;
 	private int scalar;
 	private Set<Room> rooms;
+	private Color doorColor = new Color(255, 211, 99);
+	private int totalRoomCount;
+	private Set<HallwayNode> hallways;
 	
 	public Generate() {
 		super();
@@ -35,12 +42,137 @@ public class Generate extends WindowHandler {
 		setBackground(Color.white);
 		
 		rooms = new HashSet<>();
+		hallways = new HashSet<>();
 		
 		Room baseRoom = new Room(Main.getBaseNode(), scalar);
 		baseRoom.setLocation(400, 225);
 		
+		totalRoomCount = 1;
 		rooms.add(baseRoom);
+		
+		placeRooms();
+		addHallways(rooms);
+		//addRandomRoom();
 	}
+	
+	private void addHallways(Set<Room> rooms) {
+		ArrayList<Door> doors = getTotalDoors(rooms);
+		
+		while(doors.size() > 1) {
+			int index1 = (int) (Math.random() * doors.size());
+			int index2 = (int) (Math.random() * doors.size());
+			
+			if(doors.size() == 1) return;
+			if(index2 == index1) index2 = (index2 + 1) % doors.size();
+			
+			
+		}
+	}
+	
+	private ArrayList<Door> getTotalDoors(Set<Room> rooms) {
+		ArrayList<Door> doors = new ArrayList<>();
+		
+		for(Room r : rooms) {
+			doors.addAll(r.getAvailableDoors());
+		}
+		
+		return doors;
+	}
+	
+	private void placeRooms() {
+		for(int i = 0;i<totalRoomCount;i++) {
+			Room newRoom = new Room(getRandomNode(nodes), scalar);
+			placeRandomLocation(newRoom);
+			rooms.add(newRoom);
+		}
+	}
+	
+	private void placeRandomLocation(Room room) {
+		Point location = getRandomPoint();
+		room.setLocation(location);
+		
+		while(isCollidingWith(room, rooms)) {
+			location = getRandomPoint();
+			room.setLocation(location);
+		}
+	}
+	
+	private boolean isCollidingWith(Room room, Set<Room> rooms) {
+		for(Room r : rooms) {
+			if(PolygonCollision.isColliding(room, r)) return true;
+		}
+		
+		return false;
+	}
+	
+	private Point getRandomPoint() {
+		return new Point((int) (Math.random() * 800), (int) (Math.random() * 450));
+	}
+	
+//	private void addRandomRoom() {
+//		ArrayList<Room> possibleRooms = getPossibleRooms(rooms);
+//		int index = (int) (Math.random() * possibleRooms.size());
+//		
+//		Room room = possibleRooms.get(index);
+//		
+//		Set<Node> possibleNodes = Main.getGeneratableNodes();
+//		
+//		for(Node node : possibleNodes) {
+//			if(node.getTotalDoors().size() == 0) {
+//				possibleNodes.remove(node);
+//			}
+//		}
+//		
+//		Room roomToAdd = new Room(getRandomNode(possibleNodes), scalar);
+//		Door doorToAttatch = getRandomDoorFromRoom(roomToAdd);
+//		Door mainDoor = getRandomDoorFromRoom(room);
+//		
+//		Vector pointToAttatchTo = room.getPositionOfDoor(mainDoor);
+//		pointToAttatchTo.setX(pointToAttatchTo.getX() + room.getLocation().x);
+//		pointToAttatchTo.setY(pointToAttatchTo.getY() + room.getLocation().y);
+//		
+//		Point pointLocation = new Point((int)pointToAttatchTo.getX(), (int)pointToAttatchTo.getY());
+//		roomToAdd.setLocation(pointLocation);
+//		
+//		rooms.add(roomToAdd);
+//	}
+	
+//	private Door getRandomDoorFromRoom(Room room) {
+//		ArrayList<Door> doors = room.getAvailableDoors();
+//		
+//		if(doors.size() == 0) {
+//			System.out.println("No available Doors");
+//			return null;
+//		}
+//		
+//		int index = (int) (Math.random() * doors.size());
+//		return doors.get(index);
+//	}
+//	
+//	private ArrayList<Room> getPossibleRooms(Set<Room> rooms) {
+//		ArrayList<Room> possibleRooms = new ArrayList<>();
+//		
+//		for(Room room : rooms) {
+//			if(room.getAvailableDoors().size() <= 0) continue;
+//			System.out.println("TEST");
+//			possibleRooms.add(room);
+//		}
+//		
+//		return possibleRooms;
+//	}
+//	
+//	private ArrayList<Door> getPossibleDoors(Set<Room> rooms) {
+//		ArrayList<Door> possibleDoors = new ArrayList<>();
+//		
+//		for(Room room : rooms) {
+//			for(int i = 0;i<room.getTotalDoors().size();i++) {
+//				//TEMPORARY
+//				possibleDoors.add(room.getTotalDoors().get(i));
+//			}
+//		}
+//		
+//		return possibleDoors;
+//	}
 	
 	public Node getRandomNode(Set<Node> nodes) {
 		int size = nodes.size();
@@ -67,15 +199,41 @@ public class Generate extends WindowHandler {
 		for(Room room : rooms) {
 			drawRoom(room, paint);
 		}
+		
+		for(HallwayNode hallway : hallways) {
+			drawHallway(hallway, paint);
+		}
+	}
+	
+	public void drawHallway(HallwayNode hallway, Graphics2D paint) {
+		if(hallway.getNext() == null) return;
+		
+		Vector point1 = hallway.getLocation();
+		Vector point2 = hallway.getNext().getLocation();
+		
+		drawLine(point1, point2, paint);
+		
+		drawHallway(hallway.getNext(), paint);
+	}
+	
+	public void drawLine(Vector p1, Vector p2, Graphics2D paint) {
+		paint.setStroke(new BasicStroke(5f));
+		paint.drawLine((int) p1.getX(), (int) p1.getY(), (int) p2.getX(), (int) p2.getY());
 	}
 	
 	public void drawRoom(Room room, Graphics2D paint) {
 		Polygon shapePolygon = new Polygon();
 		
+		paint.setColor(Color.black);
 		for(Point point : room.getPoints()) {
 			shapePolygon.addPoint(point.x + room.getLocation().x, point.y + room.getLocation().y);
 		}
 		
 		paint.drawPolygon(shapePolygon);
+		
+		paint.setColor(doorColor);
+		for(Door door : room.getBaseNode().getTotalDoors()) {
+			DoorPanel.drawDoor(paint, door, room.getPoints(), room.getLocation().x, room.getLocation().y, 12, dungeonSize / 5 * 2 + 1);
+		}
 	}
 }

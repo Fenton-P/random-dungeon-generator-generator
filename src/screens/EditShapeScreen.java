@@ -52,6 +52,7 @@ public class EditShapeScreen extends WindowHandler {
 		
 		finish.setOnClick(() -> {
 			Main.getSelectedNode().setPoints(shapeGrid.getScaledPoints());
+			Main.getSelectedNode().setDoors(doorPanel.getDoors());
 			WindowHandler.putWindow(NodeScreen.class);
 		});
 		
@@ -59,7 +60,7 @@ public class EditShapeScreen extends WindowHandler {
 		addDoor.setCenterBox(new Dimension(150, 800));
 		
 		shapeGrid = new ShapeGrid(Main.getSelectedNode(), this);
-		doorPanel = new DoorPanel(shapeGrid.getScale(), shapeGrid.getPoints());
+		doorPanel = new DoorPanel(shapeGrid.getPoints(), Main.getSelectedNode());
 		
 		addDoor.setOnClick(() -> {
 			doorPanel.addDoor();

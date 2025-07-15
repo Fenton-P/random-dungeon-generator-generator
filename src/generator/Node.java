@@ -109,16 +109,37 @@ public class Node {
 		}
 	}
 	
-	public Set<Door> getDoors() {
-		Set<Door> totalDoors = new HashSet<>();
-		totalDoors.addAll(doors);
-		totalDoors.addAll(parentDoors);
+	public void setDoors(Set<Door> doors) {
+		this.doors = doors;
 		
-		return totalDoors;
+		for(Node node : childNodes) {
+			node.setParentDoors(getTotalDoors());
+		}
+	}
+	
+	public void setParentDoors(Set<Door> doors) {
+		parentDoors = doors;
+	}
+	
+	public Set<Door> getDoors() {
+		return doors;
+	}
+	
+	public Set<Door> getParentDoors() {
+		return parentDoors;
+	}
+	
+	public Set<Door> getTotalDoors() {
+		Set<Door> total = new HashSet<>();
+		
+		total.addAll(doors);
+		total.addAll(parentDoors);
+		
+		return total;
 	}
 	
 	public void initParentDoors() {
-		parentDoors = parentNode.getDoors();
+		parentDoors = parentNode.getTotalDoors();
 	}
 
 	public boolean isGeneratable() {
