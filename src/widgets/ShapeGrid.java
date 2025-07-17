@@ -13,12 +13,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
 import animation.Animation;
+import codeGenerator.PolygonCollision;
+import codeGenerator.Triangle;
+import codeGenerator.Vector;
 import generator.Main;
 import generator.Node;
+import generator.Room;
 import screens.EditShapeScreen;
 
 public class ShapeGrid extends Widget {
@@ -32,6 +37,8 @@ public class ShapeGrid extends Widget {
 	private Animation shadowAnimationShrink;
 	private boolean shadowGrown;
 	private boolean canEditShape;
+	
+	private Set<Triangle> triangles;
 
 	public ShapeGrid(Node node, EditShapeScreen parent) {
 		super();
@@ -54,6 +61,7 @@ public class ShapeGrid extends Widget {
 				
 				points.get(highlight).setLocation(new Point((e.getPoint().x + 15) / 30 * 30, (15 + e.getPoint().y) / 30 * 30));
 				parent.getFakes(highlight).setLocation(new Point(points.get(highlight).x - pointRadius / 2, points.get(highlight).y - pointRadius / 2));
+				//triangles = PolygonCollision.triangulateRoom(new Room(new Node(points), 1));
 				
 				SwingUtilities.invokeLater(Main::repaintWindow);
 			}
@@ -178,12 +186,13 @@ public class ShapeGrid extends Widget {
         	drawGridAround(point, paint);
         }
         
-        paint.setPaint(Color.black);
-        paint.setStroke(new BasicStroke(canEditShape ? 3f : 2f));
         Polygon pointPolygon = new Polygon();
         for(Point point : points) {
         	pointPolygon.addPoint(point.x, point.y);
         }
+        //if(triangles != null) drawTriangles(paint);
+        paint.setPaint(Color.black);
+        paint.setStroke(new BasicStroke(canEditShape ? 3f : 2f));
         paint.drawPolygon(pointPolygon);
         
         int index = 0;
@@ -201,6 +210,31 @@ public class ShapeGrid extends Widget {
         		paint.fillArc(point.x - pointRadius/4, point.y - pointRadius/4, pointRadius/2, pointRadius/2, 0, 360);
         	}
         }
+	}
+	
+	private void drawTriangles(Graphics2D paint) {
+		for(Triangle t : triangles) {
+			paint.setPaint(Color.gray);
+			paint.setStroke(new BasicStroke(2f));
+			
+			Polygon polygon= new Polygon();
+			
+			Point avgPoint = new Point(0, 0);
+			
+			for(Point point : points) {
+				avgPoint.x += point.x;
+				avgPoint.y += point.y;
+			}
+			
+			avgPoint.x /= points.size();
+			avgPoint.y /= points.size();
+			
+			for(Vector p : t.getPoints()) {
+				polygon.addPoint((int) p.getX() + avgPoint.x, (int) p.getY() + avgPoint.y);
+			}
+			
+			paint.drawPolygon(polygon);
+		}
 	}
 	
 	private void drawGridAround(Point point, Graphics2D paint) {

@@ -17,6 +17,17 @@ public class Node {
 	private Set<Door> parentDoors;
 	private boolean generatable;
 	
+	public Node(ArrayList<Point> points) {
+		this.setNodeName("HI");
+		childNodes = new HashSet<>();
+		doors = new HashSet<>();
+		parentDoors = new HashSet<>();
+		
+		this.points = points;
+		isRootNode = true;
+		setGeneratable(true);
+	}
+	
 	public Node(String nodeName) {
 		this.setNodeName(nodeName);
 		

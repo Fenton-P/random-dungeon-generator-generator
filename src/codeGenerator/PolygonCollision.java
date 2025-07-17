@@ -56,6 +56,8 @@ public abstract class PolygonCollision {
 	}
 	
 	private static boolean triangleCollision(Triangle tri1, Triangle tri2) {
+		// TODO: FIX JUST A TEMPORARY SOLUTION DOES NOT WORK
+		
 		//System.out.println("FIRST");
 		for(Vector point1 : tri1.getPoints()) {
 			//System.out.println(point1 + " | " + tri2);
@@ -72,12 +74,19 @@ public abstract class PolygonCollision {
 		return false;
 	}
 	
-	private static Set<Triangle> triangulateRoom(Room room) {
+	private static boolean isAngleGreaterThan180(Vector v1, Vector v2, Vector v3) {
+		Vector v4 = new Vector(v1.getX() - v2.getX(), v1.getY() - v2.getY());
+		Vector v5 = new Vector(v3.getX() - v2.getX(), v3.getY() - v2.getY());
+		double cross = v4.getX() * v5.getY() - v4.getY() * v5.getX();
+		
+		return cross < 0;
+	}
+	
+	public static Set<Triangle> triangulateRoom(Room room) {
 		ArrayList<Vector> points = Vector.toVectorArray(room.getPoints());
 		Set<Triangle> triangles = new HashSet<>();
 		
 		//System.out.println(points);
-		
 		int currentIndex = 0;
 		while(points.size() > 3) {
 			if(currentIndex >= points.size()) currentIndex = 0;
@@ -89,9 +98,9 @@ public abstract class PolygonCollision {
 			Vector p2 = points.get(currentIndex);
 			Vector p3 = points.get(futureIndex);
 			
-			double angle = getAngleFromPoints(p1, p2, p3);
+			boolean angle = isAngleGreaterThan180(p1, p2, p3);
 			
-			if(angle >= Math.PI) {
+			if(angle) {
 				currentIndex++;
 				continue;
 			}
@@ -118,7 +127,7 @@ public abstract class PolygonCollision {
 			
 			triangles.add(new Triangle(p1, p2, p3));
 			points.remove(currentIndex);
-			currentIndex++;
+			currentIndex = 0;
 		}
 		
 		triangles.add(new Triangle(points.get(0), points.get(1), points.get(2)));
@@ -127,42 +136,61 @@ public abstract class PolygonCollision {
 	}
 	
 	private static boolean pointInTriangle(Vector point, Triangle triangle) {
-		double scalar1 = 0;
-		double scalar2 = 0;
-		
-		Vector A = triangle.getPoints()[0];
-		Vector B = triangle.getPoints()[1];
-		Vector C = triangle.getPoints()[2];
-		
-//		B.setX(B.getX() - A.getX());
-//		B.setY(B.getY() - A.getY());
+//		double scalar1 = 0;
+//		double scalar2 = 0;
 //		
-//		C.setX(C.getX() - A.getX());
-//		C.setY(C.getY() - A.getY());
+//		Vector A = triangle.getPoints()[0];
+//		Vector B = triangle.getPoints()[1];
+//		Vector C = triangle.getPoints()[2];
 //		
-//		A.setX(0);
-//		A.setY(0);
+////		B.setX(B.getX() - A.getX());
+////		B.setY(B.getY() - A.getY());
+////		
+////		C.setX(C.getX() - A.getX());
+////		C.setY(C.getY() - A.getY());
+////		
+////		A.setX(0);
+////		A.setY(0);
+//		
+//		double bottom = (B.getY() - A.getY()) * (C.getX() - A.getX()) - (B.getX() - A.getX()) * (C.getY() - A.getY());
+//		double top = A.getX() * (C.getY() - A.getY()) + (point.getY() - A.getY()) * (C.getX() - A.getX()) - point.getX() * (C.getY() - A.getY());
+//		
+//		scalar1 = top / bottom;
+//		
+//		top = point.getY() - A.getY() - scalar1 * (B.getY() - A.getY());
+//		bottom = C.getY() - A.getY();
+//		
+//		scalar2 = top / bottom;
+//		
+//		if(!Double.isFinite(scalar1) || !Double.isFinite(scalar2)) {
+//			return pointInTriangle(point, new Triangle(B, C, A));
+//		}
+//		
+//		boolean finalBool = scalar2 + scalar1 < 1 && scalar2 > 0 && scalar1 > 0;
+//		
+//		//System.out.println(triangle + " | " + point);
+//		//System.out.println(finalBool);
+//		
+//		return finalBool;
 		
-		double bottom = (B.getY() - A.getY()) * (C.getX() - A.getX()) - (B.getX() - A.getX()) * (C.getY() - A.getY());
-		double top = A.getX() * (C.getY() - A.getY()) + (point.getY() - A.getY()) * (C.getX() - A.getX()) - point.getX() * (C.getY() - A.getY());
+		double dX = point.getX() - triangle.getPoints()[1].getX();
+		double dY = point.getY() - triangle.getPoints()[1].getY();
+		double dX1 = triangle.getPoints()[0].getX() - triangle.getPoints()[1].getX();
+		double dY1 = triangle.getPoints()[0].getY() - triangle.getPoints()[1].getY();
+		double dX2 = triangle.getPoints()[2].getX() - triangle.getPoints()[1].getX();
+		double dY2 = triangle.getPoints()[2].getY() - triangle.getPoints()[1].getY();
 		
-		scalar1 = top / bottom;
+		double dot00 = dX1 * dX1 + dY1 * dY1;
+		double dot01 = dX1 * dX2 + dY1 * dY2;
+		double dot02 = dX1 * dX + dY1 * dY;
+		double dot11 = dX2 * dX2 + dY2 * dY2;
+		double dot12 = dX2 * dX + dY2 * dY;
 		
-		top = point.getY() - A.getY() - scalar1 * (B.getY() - A.getY());
-		bottom = C.getY() - A.getY();
-		
-		scalar2 = top / bottom;
-		
-		if(!Double.isFinite(scalar1) || !Double.isFinite(scalar2)) {
-			return pointInTriangle(point, new Triangle(B, C, A));
-		}
-		
-		boolean finalBool = scalar2 + scalar1 < 1 && scalar2 > 0 && scalar1 > 0;
-		
-		//System.out.println(triangle + " | " + point);
-		//System.out.println(finalBool);
-		
-		return finalBool;
+		double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+		double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+	
+	  return u >= 0 && v >= 0 && u + v <= 1;
 	}
 	
 	private static boolean pointInTriangleEdge(Vector point, Triangle triangle) {
