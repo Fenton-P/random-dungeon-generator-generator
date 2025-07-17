@@ -28,7 +28,6 @@ public class Generate extends WindowHandler {
 	private int scalar;
 	private Set<Room> rooms;
 	private Color doorColor = new Color(255, 211, 99);
-	private int totalRoomCount;
 	private Set<HallwayNode> hallways;
 	
 	public Generate() {
@@ -47,7 +46,6 @@ public class Generate extends WindowHandler {
 		Room baseRoom = new Room(Main.getBaseNode(), scalar);
 		baseRoom.setLocation(400, 225);
 		
-		totalRoomCount = 1;
 		rooms.add(baseRoom);
 		
 		placeRooms();
@@ -80,7 +78,7 @@ public class Generate extends WindowHandler {
 	}
 	
 	private void placeRooms() {
-		for(int i = 0;i<totalRoomCount;i++) {
+		for(int i = 0;i<dungeonSize - 1;i++) {
 			Room newRoom = new Room(getRandomNode(nodes), scalar);
 			placeRandomLocation(newRoom);
 			rooms.add(newRoom);

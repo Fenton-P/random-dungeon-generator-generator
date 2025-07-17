@@ -55,23 +55,46 @@ public abstract class PolygonCollision {
 		return triSet;
 	}
 	
-	private static boolean triangleCollision(Triangle tri1, Triangle tri2) {
-		// TODO: FIX JUST A TEMPORARY SOLUTION DOES NOT WORK
-		
-		//System.out.println("FIRST");
-		for(Vector point1 : tri1.getPoints()) {
-			//System.out.println(point1 + " | " + tri2);
-			//System.out.println(point1);
-			if(pointInTriangleEdge(point1, tri2)) return true;
-		}
-		
-		//System.out.println("SECOND");
-		for(Vector point2 : tri2.getPoints()) {
-			//System.out.println(point2);
-			if(pointInTriangleEdge(point2, tri1)) return true;
-		}
-		
-		return false;
+	private static double[] projectOntoAxis(Vector[] points, Vector axis) {
+	    double min = dot(points[0], axis);
+	    double max = min;
+	    
+	    for (int i = 1; i < points.length; i++) {
+	        double projection = dot(points[i], axis);
+	        if (projection < min) min = projection;
+	        if (projection > max) max = projection;
+	    }
+	    
+	    return new double[] { min, max };
+	}
+	
+	private static double dot(Vector v1, Vector v2) {
+	    return v1.getX() * v2.getX() + v1.getY() * v2.getY();
+	}
+	
+	public static boolean triangleCollision(Triangle t1, Triangle t2) {
+	    Vector[][] all = { t1.getPoints(), t2.getPoints() };
+	    
+	    for (int shape = 0; shape < 2; shape++) {
+	        Vector[] pts = all[shape];
+	        
+	        for (int i = 0; i < 3; i++) {
+	            Vector p1 = pts[i];
+	            Vector p2 = pts[(i + 1) % 3];
+	            Vector edge = new Vector(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+	            
+	            Vector axis = new Vector(-edge.getY(), edge.getX());
+	            
+	            double[] proj1 = projectOntoAxis(t1.getPoints(), axis);
+	            double[] proj2 = projectOntoAxis(t2.getPoints(), axis);
+	            
+	            if (proj1[1] < proj2[0] || proj2[1] < proj1[0]) {
+	                return false;
+	            }
+	        }
+	    }
+	    
+	    return true;
 	}
 	
 	private static boolean isAngleGreaterThan180(Vector v1, Vector v2, Vector v3) {
