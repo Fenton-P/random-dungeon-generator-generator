@@ -33,7 +33,7 @@ public class Generate extends WindowHandler {
 	public Generate() {
 		super();
 		
-		dungeonSize = 5;
+		dungeonSize = 6;
 		scalar = 10;
 		nodes = Main.getGeneratableNodes();
 		
@@ -42,11 +42,6 @@ public class Generate extends WindowHandler {
 		
 		rooms = new HashSet<>();
 		hallways = new HashSet<>();
-		
-		Room baseRoom = new Room(Main.getBaseNode(), scalar);
-		baseRoom.setLocation(400, 225);
-		
-		rooms.add(baseRoom);
 		
 		placeRooms();
 		addHallways(rooms);
@@ -63,8 +58,34 @@ public class Generate extends WindowHandler {
 			if(doors.size() == 1) return;
 			if(index2 == index1) index2 = (index2 + 1) % doors.size();
 			
+			Vector room1Position = applyRoomTransformation(doors.get(index1).getParentRoom().getPositionOfDoor(doors.get(index1)), doors.get(index1).getParentRoom());
+			Vector room2Position = applyRoomTransformation(doors.get(index2).getParentRoom().getPositionOfDoor(doors.get(index2)), doors.get(index2).getParentRoom());
 			
+			HallwayNode hallway = new HallwayNode(room1Position);
+			hallway.setNext(new HallwayNode(room2Position));
+			
+			hallways.add(hallway);
+			
+			if(index1 < index2) {
+				doors.remove(index2);
+				doors.remove(index1);
+				continue;
+			}
+			
+			doors.remove(index1);
+			doors.remove(index2);
 		}
+		
+		System.out.println(hallways);
+	}
+	
+	private Vector applyRoomTransformation(Vector p1, Room r) {
+		Vector newLocation = new Vector(p1.getX(), p1.getY());
+		
+		newLocation.setX(newLocation.getX() + r.getLocation().x);
+		newLocation.setY(newLocation.getY() + r.getLocation().y);
+		
+		return newLocation;
 	}
 	
 	private ArrayList<Door> getTotalDoors(Set<Room> rooms) {
@@ -78,8 +99,18 @@ public class Generate extends WindowHandler {
 	}
 	
 	private void placeRooms() {
-		for(int i = 0;i<dungeonSize - 1;i++) {
+		for(int i = 0;i<dungeonSize;i++) {
 			Room newRoom = new Room(getRandomNode(nodes), scalar);
+			
+			Set<Door> doors = new HashSet<>();
+			for(Door door : newRoom.getDoors()) {
+				doors.add(new Door(door.getPoint1(), door.getPoint2(), door.getScalar(), newRoom));
+			}
+			
+			newRoom.setDoors(doors);
+			
+			System.out.println(newRoom.getDoors());
+			
 			placeRandomLocation(newRoom);
 			rooms.add(newRoom);
 		}
@@ -192,8 +223,6 @@ public class Generate extends WindowHandler {
 		Graphics2D paint = (Graphics2D) g;
 		paint.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
-		paint.setStroke(new BasicStroke(dungeonSize / 5 * 2));
-		
 		for(Room room : rooms) {
 			drawRoom(room, paint);
 		}
@@ -216,12 +245,14 @@ public class Generate extends WindowHandler {
 	
 	public void drawLine(Vector p1, Vector p2, Graphics2D paint) {
 		paint.setStroke(new BasicStroke(5f));
+		paint.setColor(Color.black);
 		paint.drawLine((int) p1.getX(), (int) p1.getY(), (int) p2.getX(), (int) p2.getY());
 	}
 	
 	public void drawRoom(Room room, Graphics2D paint) {
 		Polygon shapePolygon = new Polygon();
 		
+		paint.setStroke(new BasicStroke(2f));
 		paint.setColor(Color.black);
 		for(Point point : room.getPoints()) {
 			shapePolygon.addPoint(point.x + room.getLocation().x, point.y + room.getLocation().y);
@@ -231,7 +262,7 @@ public class Generate extends WindowHandler {
 		
 		paint.setColor(doorColor);
 		for(Door door : room.getBaseNode().getTotalDoors()) {
-			DoorPanel.drawDoor(paint, door, room.getPoints(), room.getLocation().x, room.getLocation().y, 12, dungeonSize / 5 * 2 + 1);
+			DoorPanel.drawDoor(paint, door, room.getPoints(), room.getLocation().x, room.getLocation().y, 12, 3);
 		}
 	}
 }

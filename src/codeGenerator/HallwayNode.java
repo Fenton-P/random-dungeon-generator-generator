@@ -29,4 +29,8 @@ public class HallwayNode {
 	public void setNext(HallwayNode next) {
 		this.next = next;
 	}
+	
+	public String toString() {
+		return location + (next == null ? "" : " -> " + next.toString());
+	}
 }

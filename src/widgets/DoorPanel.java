@@ -186,7 +186,7 @@ public class DoorPanel extends Widget {
 				
 				double scalar = closestPoint.distanceTo(startPoint) / Vector.pointDistance(startPoint, nextPoint);
 				
-				return new Door(sorted.get(i), (sorted.get(i) + 1) % points.size(), scalar);
+				return new Door(sorted.get(i), (sorted.get(i) + 1) % points.size(), scalar, null);
 			}
 		}
 		
@@ -208,7 +208,7 @@ public class DoorPanel extends Widget {
 			//System.out.println(distance);
 		}
 		
-		return new Door(index, (index + 1) % points.size(), 0);
+		return new Door(index, (index + 1) % points.size(), 0, null);
 	}
 	
 	private boolean vectorBetweenPoints(Vector v, Point p1, Point p2) {

@@ -19,8 +19,10 @@ public class Room {
 		baseNode = node;
 		location = new Point(0, 0);
 		
-		setParentDoors(new ArrayList<>());
-		setDoors(new ArrayList<>());
+		setParentDoors(node.getParentDoors());
+		setDoors(node.getTotalDoors());
+		
+		
 		
 		centerPoints(scale);
 		rotatePoints();
@@ -96,8 +98,14 @@ public class Room {
 		return parentDoors;
 	}
 
-	public void setParentDoors(ArrayList<Door> parentDoors) {
-		this.parentDoors = parentDoors;
+	public void setParentDoors(Set<Door> parentDoors) {
+		ArrayList<Door> d = new ArrayList<>();
+		
+		for(Door door : parentDoors) {
+			d.add(door);
+		}
+		
+		this.parentDoors = d;
 		if(this.doors == null) return;
 		unconnectedDoors = getTotalDoors();
 	}
@@ -115,8 +123,14 @@ public class Room {
 		return doors;
 	}
 
-	public void setDoors(ArrayList<Door> doors) {
-		this.doors = doors;
+	public void setDoors(Set<Door> doors) {
+		ArrayList<Door> d = new ArrayList<>();
+		
+		for(Door door : doors) {
+			d.add(door);
+		}
+		
+		this.doors = d;
 		if(this.parentDoors==null) return;
 		unconnectedDoors = getTotalDoors();
 	}

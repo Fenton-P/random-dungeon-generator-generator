@@ -4,15 +4,17 @@ public class Door {
 	private int point1;
 	private int point2;
 	private double scalar;
+	private Room parentRoom;
 	
-	public Door(int point1, int point2, double scalar) {
+	public Door(int point1, int point2, double scalar, Room parentRoom) {
 		this.setPoint1(point1);
 		this.setPoint2(point2);
 		this.setScalar(scalar);
+		this.setParentRoom(parentRoom);
 	}
 	
 	public Door() {
-		this(0, 1, 0.5);
+		this(0, 1, 0.5, null);
 	}
 
 	public int getPoint1() {
@@ -40,6 +42,14 @@ public class Door {
 	}
 	
 	public String toString() {
-		return point1 + " | " + point2 + " | " + scalar;
+		return point1 + " | " + point2 + " | " + scalar + " | " + getParentRoom();
+	}
+
+	public Room getParentRoom() {
+		return parentRoom;
+	}
+
+	public void setParentRoom(Room parentRoom) {
+		this.parentRoom = parentRoom;
 	}
 }
