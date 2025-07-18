@@ -31,6 +31,8 @@ public class NodeScreen extends WindowHandler {
 	private ModernButton addNewNode;
 	private ModernButton generationSettings;
 	private ModernButton generate;
+	private ModernButton save;
+	private String saveName;
 
 	public NodeScreen() {
 		super();
@@ -44,8 +46,12 @@ public class NodeScreen extends WindowHandler {
 		infoPanel = new InfoPanel(selectedNode);
 		selectedNode.setInfoPanel(infoPanel);
 		
-		backBtn = new ModernButton("Home");
-		backBtn.setCenterBox(new Dimension(150, 100));
+		save = new ModernButton("Save");
+		save.setCenterBox(150, 100);
+		save.setShadowDepth(10);
+		
+		backBtn = new ModernButton("Back");
+		backBtn.setCenterBox(new Dimension(350, 100));
 		backBtn.setShadowDepth(10);
 		
 		addNewNode = new ModernButton("+");
@@ -62,6 +68,16 @@ public class NodeScreen extends WindowHandler {
 		
 		generate.setOnClick(() -> WindowHandler.putWindow(Generate.class));
 		backBtn.setOnClick(() -> WindowHandler.putWindow(OpeningScreen.class));
+		
+		save.setOnClick(() -> {
+			// TODO: Add saving
+			if(saveName == null) {
+				WindowHandler.putWindow(CreateSave.class);
+				return;
+			}
+			
+			WindowHandler.putWindow(OpeningScreen.class);
+		});
 		
 		addNewNode.setOnClick(() -> {
 			Main.setCreatingRootNode(true);
@@ -85,10 +101,11 @@ public class NodeScreen extends WindowHandler {
 			SwingUtilities.invokeLater(Main::repaintWindow);
 		});
 		
-		shadowPanel.addShadow(backBtn, addNewNode, generationSettings, generate, selectedNode.getShadowedWidget());
+		shadowPanel.addShadow(backBtn, save, addNewNode, generationSettings, generate, selectedNode.getShadowedWidget());
 		
 		add(infoPanel);
 		add(backBtn);
+		add(save);
 		add(generate);
 		add(generationSettings);
 		add(addNewNode);
