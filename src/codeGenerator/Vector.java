@@ -87,4 +87,11 @@ public class Vector {
 		
 		return Math.sqrt(x1 * x1 + x2 * x2);
 	}
+	
+	public Vector rotate(double angle) {
+        double xRotated = x * Math.cos(angle) - y * Math.sin(angle);
+        double yRotated = x * Math.sin(angle) + y * Math.cos(angle);
+        
+        return new Vector(xRotated, yRotated);
+	}
 }

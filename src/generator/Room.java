@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import codeGenerator.PolygonCollision;
 import codeGenerator.Vector;
 
 public class Room {
@@ -14,20 +15,33 @@ public class Room {
 	private ArrayList<Door> parentDoors;
 	private ArrayList<Door> doors;
 	private ArrayList<Door> unconnectedDoors;
+	private double rotation;
 	
 	public Room(Node node, int scale) {
 		baseNode = node;
 		location = new Point(0, 0);
+		setRotation(0);
 		
 		setParentDoors(node.getParentDoors());
 		setDoors(node.getTotalDoors());
-		
-		
 		
 		centerPoints(scale);
 		rotatePoints();
 		
 		unconnectedDoors = getTotalDoors();
+	}
+	
+	public double getAngleOfDoor(Door door) {
+		double angle = rotation;
+		
+		Point p1 = points.get(door.getPoint1());
+		Point p2 = points.get(door.getPoint2());
+		Vector direction = new Vector(p2.x - p1.x, p2.y - p1.y);
+		direction = direction.normalize();
+		direction = direction.rotate(Math.PI / 2);
+		angle += PolygonCollision.getTheta(direction);
+		
+		return angle;
 	}
 	
 	public ArrayList<Door> getAvailableDoors() {
@@ -50,7 +64,8 @@ public class Room {
 		ArrayList<Point> points = new ArrayList<>();
 		
 		for(Point point : this.points) {
-			points.add(new Point(point.x, point.y));
+			Vector v = rotation % (2 * Math.PI) == 0 ? new Vector(point.x, point.y) : new Vector(point.x, point.y).rotate(rotation);
+			points.add(new Point((int)(v.getX() + 0.5), (int)(v.getY() + 0.5)));
 		}
 		
 		return points;
@@ -136,6 +151,8 @@ public class Room {
 	}
 
 	public Vector getPositionOfDoor(Door door) {
+		ArrayList<Point> points = getPoints();
+		
 		Point p1 = points.get(door.getPoint1());
 		Point p2 = points.get(door.getPoint2());
 		
@@ -144,5 +161,13 @@ public class Room {
 		line.setY(line.getY() * door.getScalar());
 		
 		return new Vector(p1.getX() + line.getX(), p1.getY() + line.getY());
+	}
+
+	public double getRotation() {
+		return rotation;
+	}
+
+	public void setRotation(double rotation) {
+		this.rotation = rotation;
 	}
 }
