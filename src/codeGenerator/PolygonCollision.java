@@ -326,4 +326,14 @@ public abstract class PolygonCollision {
 		
 		return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 	}
+	
+	public static boolean checkPointAgainstRoom(Room room, Vector v) {
+		Set<Triangle> triangles = triangulateRoom(room);
+		
+		for(Triangle triangle : triangles) {
+			if(pointInTriangle(v, triangle)) return true;
+		}
+		
+		return false;
+	}
 }

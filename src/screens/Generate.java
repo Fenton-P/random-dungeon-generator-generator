@@ -29,11 +29,12 @@ public class Generate extends WindowHandler {
 	private Set<Room> rooms;
 	private Color doorColor = new Color(255, 211, 99);
 	private Set<HallwayNode> hallways;
+	private int avgLength = 10;
 	
 	public Generate() {
 		super();
 		
-		dungeonSize = 6;
+		dungeonSize = 2;
 		scalar = 10;
 		nodes = Main.getGeneratableNodes();
 		
@@ -58,11 +59,10 @@ public class Generate extends WindowHandler {
 			if(doors.size() == 1) return;
 			if(index2 == index1) index2 = (index2 + 1) % doors.size();
 			
-			Vector room1Position = applyRoomTransformation(doors.get(index1).getParentRoom().getPositionOfDoor(doors.get(index1)), doors.get(index1).getParentRoom());
-			Vector room2Position = applyRoomTransformation(doors.get(index2).getParentRoom().getPositionOfDoor(doors.get(index2)), doors.get(index2).getParentRoom());
+			Vector room1Position = applyRoomTransformation(doors.get(index1), doors.get(index1).getParentRoom());
+			Vector room2Position = applyRoomTransformation(doors.get(index2), doors.get(index2).getParentRoom());
 			
-			HallwayNode hallway = new HallwayNode(room1Position);
-			hallway.setNext(new HallwayNode(room2Position));
+			HallwayNode hallway = createNewHallway(room1Position, room2Position);
 			
 			hallways.add(hallway);
 			
@@ -75,11 +75,67 @@ public class Generate extends WindowHandler {
 			doors.remove(index1);
 			doors.remove(index2);
 		}
-		
-		System.out.println(hallways);
 	}
 	
-	private Vector applyRoomTransformation(Vector p1, Room r) {
+	private HallwayNode createNewHallway(Vector p1, Vector p2) {
+		HallwayNode hallway = new HallwayNode(p1);
+		
+//		int length = 3 + (int) (Math.random() * (avgLength - 3));
+//		
+//		HallwayNode current = hallway;
+//		for(int i = 0;i<length - 1;i++) {
+//			int x = (int) (Math.random() * 800);
+//			int y = (int) (Math.random() * 450);
+//			
+//			HallwayNode next = new HallwayNode(new Vector(x, y));
+//			
+//			if(!checkLineCollision(current.getLocation(), next.getLocation())) {
+//				current.setNext(next);
+//			}
+//			
+//			current = current.getNext();
+//		}
+//		
+//		current.setNext(new HallwayNode(p2));
+		
+		int d = 50;
+		double distance = p1.distanceTo(p2);
+		HallwayNode current = hallway;
+		double r = 50;
+		
+		while(distance > d) {
+			double x = (int) (Math.random() * r - r / 2) + p2.getX();
+			double y = (int) (Math.random() * r - r / 2) + p2.getY();
+			
+			Vector potential = new Vector(x, y);
+			double distance2 = potential.distanceTo(current.getLocation());
+			if(distance2 == 0) continue;
+			double scale = d / distance2;
+			potential.setX(potential.getX() * scale);
+			potential.setY(potential.getY() * scale);
+			
+			if(pointInRooms(potential)) continue;
+			current.setNext(new HallwayNode(potential));
+			current = current.getNext();
+		}
+		
+		return hallway;
+	}
+	
+	private boolean pointInRooms(Vector v) {
+		for(Room room : rooms) {
+			if(PolygonCollision.checkPointAgainstRoom(room, v)) return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean checkLineCollision(Vector v1,  Vector v2) {
+		return false;
+	}
+	
+	private Vector applyRoomTransformation(Door d, Room r) {
+		Vector p1 = r.getPositionOfDoor(d);
 		Vector newLocation = new Vector(p1.getX(), p1.getY());
 		
 		newLocation.setX(newLocation.getX() + r.getLocation().x);
@@ -108,8 +164,6 @@ public class Generate extends WindowHandler {
 			}
 			
 			newRoom.setDoors(doors);
-			
-			System.out.println(newRoom.getDoors());
 			
 			placeRandomLocation(newRoom);
 			rooms.add(newRoom);
