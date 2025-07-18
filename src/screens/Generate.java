@@ -34,7 +34,7 @@ public class Generate extends WindowHandler {
 	public Generate() {
 		super();
 		
-		dungeonSize = 2;
+		dungeonSize = 20;
 		scalar = 10;
 		nodes = Main.getGeneratableNodes();
 		
@@ -58,7 +58,10 @@ public class Generate extends WindowHandler {
 		
 		rooms.add(baseRoom);
 		
-		addRandomRoom();
+		for(int i = 0;i<dungeonSize;i++) {
+			if(getTotalDoors(rooms).size() < 1) break;
+			addRandomRoom();
+		}
 		
 		//placeRooms();
 		//addHallways(rooms);
@@ -210,49 +213,70 @@ public class Generate extends WindowHandler {
 	
 	private void addRandomRoom() {
 		ArrayList<Door> doors = getTotalDoors(rooms);
-		int index = (int) (Math.random() * doors.size());
 		
-		Door door = doors.get(index);
-		Room room = door.getParentRoom();
-		
-		Set<Node> possibleNodes = Main.getGeneratableNodes();
-		
-		for(Node node : possibleNodes) {
-			if(node.getTotalDoors().size() == 0) {
+		while(doors.size() > 0) {
+			int index = (int) (Math.random() * doors.size());
+			Door door = doors.get(index);
+			doors.remove(index);
+			Room room = door.getParentRoom();
+			
+			Set<Node> possibleNodes = Main.getGeneratableNodes();
+			
+			for(Node node : possibleNodes) {
+				if(node.getTotalDoors().size() == 0) {
+					possibleNodes.remove(node);
+				}
+			}
+			
+			while(possibleNodes.size() > 0) {
+				Node node = getRandomNode(possibleNodes);
 				possibleNodes.remove(node);
+				Room roomToAdd = new Room(node, scalar);
+				
+				Set<Door> roomDoors = new HashSet<>();
+				for(Door d : roomToAdd.getDoors()) {
+					roomDoors.add(new Door(d.getPoint1(), d.getPoint2(), d.getScalar(), roomToAdd));
+				}
+				
+				roomToAdd.setParentDoors(new HashSet<Door>());
+				roomToAdd.setDoors(roomDoors);
+				
+				Door doorToAttatch = getRandomDoorFromRoom(roomToAdd);
+				
+				Vector pointToAttatchTo = room.getPositionOfDoor(door);
+				pointToAttatchTo.setX(pointToAttatchTo.getX() + room.getLocation().x);
+				pointToAttatchTo.setY(pointToAttatchTo.getY() + room.getLocation().y);
+				
+				double angle = room.getAngleOfDoor(door);
+				double angle2 = roomToAdd.getAngleOfDoor(doorToAttatch);
+				double finalAngle = angle2 - angle - Math.PI;
+				
+				Point pointLocation = new Point((int)pointToAttatchTo.getX(), (int)pointToAttatchTo.getY());
+				roomToAdd.setLocation(pointLocation);
+				roomToAdd.setRotation(finalAngle);
+				
+				Vector location = roomToAdd.getPositionOfDoor(door);
+				location.setX(-location.getX() + roomToAdd.getLocation().x);
+				location.setY(-location.getY() + roomToAdd.getLocation().y);
+				
+				roomToAdd.setLocation(new Point((int) location.getX(), (int) location.getY()));
+				
+				if(!checkAgainstOtherRooms(roomToAdd)) {
+					roomToAdd.makeDoorUnavailable(doorToAttatch);
+					room.makeDoorUnavailable(doorToAttatch);
+					rooms.add(roomToAdd);
+					return;
+				}
 			}
 		}
-		
-		Room roomToAdd = new Room(getRandomNode(possibleNodes), scalar);
-		
-		Set<Door> roomDoors = new HashSet<>();
-		for(Door d : roomToAdd.getDoors()) {
-			roomDoors.add(new Door(d.getPoint1(), d.getPoint2(), d.getScalar(), roomToAdd));
+	}
+	
+	private boolean checkAgainstOtherRooms(Room r) {
+		for(Room room : rooms) {
+			if(PolygonCollision.isColliding(r, room)) return true;
 		}
-		
-		roomToAdd.setDoors(roomDoors);
-		
-		Door doorToAttatch = getRandomDoorFromRoom(roomToAdd);
-		
-		Vector pointToAttatchTo = room.getPositionOfDoor(door);
-		pointToAttatchTo.setX(pointToAttatchTo.getX() + room.getLocation().x);
-		pointToAttatchTo.setY(pointToAttatchTo.getY() + room.getLocation().y);
-		
-		double angle = room.getAngleOfDoor(door);
-		double angle2 = roomToAdd.getAngleOfDoor(doorToAttatch);
-		double finalAngle = angle - angle2 - Math.PI;
-		
-		Point pointLocation = new Point((int)pointToAttatchTo.getX(), (int)pointToAttatchTo.getY());
-		roomToAdd.setLocation(pointLocation);
-		roomToAdd.setRotation(finalAngle);
-		
-		Vector location = roomToAdd.getPositionOfDoor(door);
-		location.setX(-location.getX() + roomToAdd.getLocation().x);
-		location.setY(-location.getY() + roomToAdd.getLocation().y);
-		
-		roomToAdd.setLocation(new Point((int) location.getX(), (int) location.getY()));
-		
-		rooms.add(roomToAdd);
+			
+		return false;
 	}
 	
 	private Door getRandomDoorFromRoom(Room room) {
@@ -316,6 +340,14 @@ public class Generate extends WindowHandler {
 			drawRoom(room, paint);
 		}
 		
+		for(Room room : rooms) {
+			paint.setColor(doorColor);
+			for(Door door : room.getTotalDoors()) {
+				if(room.getAvailableDoors().contains(door)) continue;
+				DoorPanel.drawDoor(paint, door, room.getPoints(), room.getLocation().x, room.getLocation().y, 12, 3);
+			}
+		}
+		
 //		for(HallwayNode hallway : hallways) {
 //			drawHallway(hallway, paint);
 //		}
@@ -348,10 +380,5 @@ public class Generate extends WindowHandler {
 		}
 		
 		paint.drawPolygon(shapePolygon);
-		
-		paint.setColor(doorColor);
-		for(Door door : room.getBaseNode().getTotalDoors()) {
-			DoorPanel.drawDoor(paint, door, room.getPoints(), room.getLocation().x, room.getLocation().y, 12, 3);
-		}
 	}
 }

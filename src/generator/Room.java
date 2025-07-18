@@ -170,4 +170,8 @@ public class Room {
 	public void setRotation(double rotation) {
 		this.rotation = rotation;
 	}
+
+	public void makeDoorUnavailable(Door doorToAttatch) {
+		unconnectedDoors.remove(doorToAttatch);
+	}
 }

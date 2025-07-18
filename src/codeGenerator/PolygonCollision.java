@@ -88,7 +88,8 @@ public abstract class PolygonCollision {
 	            double[] proj1 = projectOntoAxis(t1.getPoints(), axis);
 	            double[] proj2 = projectOntoAxis(t2.getPoints(), axis);
 	            
-	            if (proj1[1] < proj2[0] || proj2[1] < proj1[0]) {
+	            double give = 0;
+	            if (proj1[1] <= proj2[0] + give || proj2[1] <= proj1[0] + give) {
 	                return false;
 	            }
 	        }
