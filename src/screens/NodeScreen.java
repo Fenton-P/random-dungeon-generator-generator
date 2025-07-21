@@ -6,6 +6,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.CubicCurve2D;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +23,8 @@ import generator.WindowHandler;
 import widgets.InfoPanel;
 import widgets.ModernButton;
 import widgets.RoomNodeWidget;
+
+import org.json.JSONObject;
 
 public class NodeScreen extends WindowHandler {
 	private static final long serialVersionUID = 4117245432959222704L;
@@ -76,6 +81,8 @@ public class NodeScreen extends WindowHandler {
 				return;
 			}
 			
+			updateSave();
+			
 			WindowHandler.putWindow(OpeningScreen.class);
 		});
 		
@@ -117,6 +124,33 @@ public class NodeScreen extends WindowHandler {
 		this.setComponentZOrder(infoPanel, 0);
 		this.setComponentZOrder(addNewNode, 0);
 		this.setComponentZOrder(backBtn, 0);
+	}
+	
+	private void updateSave() {
+		File file = new File("saves/" + saveName);
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(getSaveInfo());
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String getSaveInfo() {
+		JSONObject obj = new JSONObject();
+		
+		obj.put("hi", "hoi");
+		
+		return obj.toString(8);
+		//return "INFORMATION";
 	}
 	
 	private void addAll(Set<RoomNodeWidget> components) {

@@ -34,7 +34,7 @@ public class Generate extends WindowHandler {
 	public Generate() {
 		super();
 		
-		dungeonSize = 20;
+		dungeonSize = 100;
 		scalar = 10;
 		nodes = Main.getGeneratableNodes();
 		
@@ -263,7 +263,7 @@ public class Generate extends WindowHandler {
 				
 				if(!checkAgainstOtherRooms(roomToAdd)) {
 					roomToAdd.makeDoorUnavailable(doorToAttatch);
-					room.makeDoorUnavailable(doorToAttatch);
+					room.makeDoorUnavailable(door);
 					rooms.add(roomToAdd);
 					return;
 				}
